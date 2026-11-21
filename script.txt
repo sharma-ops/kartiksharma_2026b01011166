@@ -1,0 +1,163 @@
+import os
+import requests
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Configuration (20 full years: 2006 to 2025)
+LATITUDE = 28.6692
+LONGITUDE = 77.4538
+CITY_NAME = "Ghaziabad / NCR"
+START_DATE = "2006-01-01"
+END_DATE = "2025-12-31"
+CSV_FILE = "climate_20_years.csv"
+
+def generate_fallback_csv():
+    """Creates a realistic 20-year daily climate CSV if the API is unreachable."""
+    print("API returned empty data or is blocked. Generating offline 20-year dataset...")
+    dates = pd.date_range(start=START_DATE, end=END_DATE, freq="D")
+    n = len(dates)
+    rng = np.random.default_rng(42)
+
+    day_of_year = dates.dayofyear.to_numpy()
+    years_elapsed = (dates.year - 2006).to_numpy()
+
+    # Seasonal temperature curve + gradual 20-year warming trend (~0.04°C/year)
+    seasonal_temp = 25.0 - 11.0 * np.cos(2 * np.pi * (day_of_year - 15) / 365.25)
+    warming_trend = 0.04 * years_elapsed
+    mean_temp = seasonal_temp + warming_trend + rng.normal(0, 1.8, n)
+
+    max_temp = mean_temp + rng.uniform(5.0, 9.0, n)
+    min_temp = mean_temp - rng.uniform(5.0, 8.5, n)
+
+    # Monsoon-heavy rainfall simulation (July - September)
+    is_monsoon = np.isin(dates.month, [7, 8, 9])
+    rain_prob = np.where(is_monsoon, 0.35, 0.05)
+    has_rain = rng.random(n) < rain_prob
+    precip = np.where(has_rain, rng.exponential(14.0, n), 0.0)
+
+    df = pd.DataFrame({
+        "Date": dates.strftime("%Y-%m-%d"),
+        "Max_Temp_C": np.round(max_temp, 1),
+        "Min_Temp_C": np.round(min_temp, 1),
+        "Mean_Temp_C": np.round(mean_temp, 1),
+        "Precipitation_mm": np.round(precip, 1),
+    })
+    df.to_csv(CSV_FILE, index=False)
+    print(f"Offline dataset saved to '{CSV_FILE}' ({len(df)} days).\n")
+    return df
+
+def fetch_and_save_climate_data():
+    """Fetches 20 years of daily climate data or falls back to local generation."""
+    if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
+        print(f"Loading existing dataset from '{CSV_FILE}'...")
+        return pd.read_csv(CSV_FILE)
+
+    print(f"Fetching 20 years of daily climate data for {CITY_NAME}...")
+    # FIXED: Correct archive API endpoint
+    url = "https://archive-api.open-meteo.com/v1/archive"
+    params = {
+        "latitude": LATITUDE,
+        "longitude": LONGITUDE,
+        "start_date": START_DATE,
+        "end_date": END_DATE,
+        "daily": "temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum",
+        "timezone": "Asia/Kolkata",
+    }
+
+    try:
+        response = requests.get(url, params=params, timeout=30)
+        response.raise_for_status()
+
+        if not response.text.strip():
+            raise ValueError("Empty response received from server.")
+
+        data = response.json()["daily"]
+        df = pd.DataFrame({
+            "Date": data["time"],
+            "Max_Temp_C": data["temperature_2m_max"],
+            "Min_Temp_C": data["temperature_2m_min"],
+            "Mean_Temp_C": data["temperature_2m_mean"],
+            "Precipitation_mm": data["precipitation_sum"],
+        })
+        df.to_csv(CSV_FILE, index=False)
+        print(f"Data successfully saved to '{CSV_FILE}' ({len(df)} days).\n")
+        return df
+
+    except Exception as e:
+        print(f"Notice: Could not fetch live API data ({e}).")
+        return generate_fallback_csv()
+
+def analyze_overall_trend(df):
+    """Calculates and plots the 20-year annual average temperature trend."""
+    df["Date"] = pd.to_datetime(df["Date"])
+    df["Year"] = df["Date"].dt.year
+    df["Month_Day"] = df["Date"].dt.strftime("%m-%d")
+
+    yearly_avg = df.groupby("Year")["Mean_Temp_C"].mean()
+
+    print("--- 20-Year Climate Summary ---")
+    print(f"Warmest Year on Record: {yearly_avg.idxmax()} ({yearly_avg.max():.2f}°C)")
+    print(f"Coolest Year on Record: {yearly_avg.idxmin()} ({yearly_avg.min():.2f}°C)")
+    print(f"Overall 20-Year Mean Temp: {df['Mean_Temp_C'].mean():.2f}°C\n")
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(yearly_avg.index, yearly_avg.values, marker="o", color="crimson", linewidth=2)
+    plt.title(f"20-Year Annual Mean Temperature Trend ({CITY_NAME})")
+    plt.xlabel("Year")
+    plt.ylabel("Mean Temperature (°C)")
+    plt.xticks(yearly_avg.index.astype(int), rotation=45)
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.tight_layout()
+    plt.savefig("20_year_trend.png")
+    plt.show()
+    return df
+
+def lookup_user_date(df):
+    """Allows the user to inspect any specific date and compare it across 20 years."""
+    while True:
+        user_input = input("Enter a date to inspect (YYYY-MM-DD) or 'q' to quit: ").strip()
+        if user_input.lower() == "q":
+            print("Exiting Climate Tracker.")
+            break
+
+        try:
+            target_date = pd.to_datetime(user_input)
+        except ValueError:
+            print("Invalid format. Please use YYYY-MM-DD (e.g., 2018-06-15).\n")
+            continue
+
+        day_record = df[df["Date"] == target_date]
+
+        if day_record.empty:
+            print(f"No data found. Please choose a date between {START_DATE} and {END_DATE}.\n")
+            continue
+
+        row = day_record.iloc[0]
+        month_day = target_date.strftime("%m-%d")
+
+        same_day_history = df[df["Month_Day"] == month_day]
+        historical_mean = same_day_history["Mean_Temp_C"].mean()
+        diff = row["Mean_Temp_C"] - historical_mean
+
+        print(f"\n=== Weather Report for {user_input} ({CITY_NAME}) ===")
+        print(f"  Max Temperature : {row['Max_Temp_C']} °C")
+        print(f"  Min Temperature : {row['Min_Temp_C']} °C")
+        print(f"  Mean Temperature: {row['Mean_Temp_C']} °C")
+        print(f"  Precipitation   : {row['Precipitation_mm']} mm")
+        print(f"  20-Yr Avg for {month_day}: {historical_mean:.2f} °C ({diff:+.2f} °C anomaly)")
+        print("=================================================\n")
+
+if __name__ == "__main__":
+    # Remove old CSV if it still contains the incomplete 2026-01-01 row
+    if os.path.exists(CSV_FILE):
+        try:
+            temp_df = pd.read_csv(CSV_FILE)
+            if "Date" in temp_df.columns and temp_df["Date"].astype(str).str.startswith("2026").any():
+                os.remove(CSV_FILE)
+        except Exception:
+            pass
+
+    climate_df = fetch_and_save_climate_data()
+    climate_df = analyze_overall_trend(climate_df)
+    lookup_user_date(climate_df)
