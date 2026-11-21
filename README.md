@@ -1,62 +1,172 @@
-# Student Performance Analysis (Sample Data Analyst Project)
+# Climate Change Analysis (2006–2025)
 
-A beginner-friendly data analysis project for **B.Tech 1st Year – Data Analyst** learners.
-It analyses what drives first-semester marks using Python, pandas, matplotlib and seaborn.
+## 🌍 Project Overview
 
-> The dataset is **synthetic** (computer-generated). It contains no real student data.
+This project analyzes 20 years of climate data (2006–2025) for **Ghaziabad/NCR, India** to study long-term temperature and precipitation trends and understand the impact of climate change over time.
 
-## Business problem
-The college wants to identify which factors influence student marks so mentors can support at-risk students early.
+The project collects historical weather data, performs exploratory data analysis (EDA), identifies climate patterns, estimates warming trends, and visualizes key findings through informative charts and statistical analysis.
 
-## Questions answered
-1. What is the overall performance of the batch?
-2. Do attendance and study hours affect marks?
-3. Does performance differ by branch, gender, residence or tutoring?
-4. Which students are at risk (average marks below 50)?
+---
 
-## Dataset
-`data/raw/student_performance.csv` – 255 rows, 11 columns (Student_ID, Gender, Branch, Residence, Attendance_Pct, Study_Hours_Per_Week, Sleep_Hours, Tutoring, Maths_Marks, Physics_Marks, Programming_Marks).
-The raw file intentionally has missing values, duplicates, inconsistent text and an impossible attendance value so you can practise cleaning.
+## 🎯 Objectives
 
-## Project structure
+- Analyze annual temperature trends from 2006 to 2025
+- Study long-term rainfall patterns
+- Calculate the warming rate over two decades
+- Identify the hottest and coolest years
+- Detect extreme heat events
+- Perform climate anomaly analysis
+- Generate visualizations for climate insights
+
+---
+
+## 📊 Dataset Information
+
+**Location:** Ghaziabad / National Capital Region (NCR), India
+
+- Latitude: 28.6692
+- Longitude: 77.4538
+
+**Time Period:**
+- Start Date: 2006-01-01
+- End Date: 2025-12-31
+
+**Features Included:**
+
+| Feature | Description |
+|----------|-------------|
+| Date | Observation Date |
+| Max_Temp_C | Daily Maximum Temperature (°C) |
+| Min_Temp_C | Daily Minimum Temperature (°C) |
+| Mean_Temp_C | Daily Average Temperature (°C) |
+| Precipitation_mm | Daily Rainfall (mm) |
+
+---
+
+## 🛠️ Technologies Used
+
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- Requests
+- SciPy
+- Jupyter Notebook
+- Open-Meteo API
+
+---
+
+## 📈 Analysis Performed
+
+### 1. Annual Temperature Trend Analysis
+- Computed yearly average temperatures
+- Visualized warming trends over 20 years
+- Identified hottest and coolest years
+
+### 2. Rainfall Trend Analysis
+- Calculated annual precipitation totals
+- Examined changing rainfall patterns
+
+### 3. Monthly Climate Pattern Analysis
+- Studied seasonal temperature variations
+- Compared monthly climate behavior
+
+### 4. Climate Change Assessment
+- Estimated long-term warming rate using linear regression
+- Measured overall temperature increase across two decades
+
+### 5. Extreme Weather Detection
+- Identified extreme heat events
+- Analyzed days with unusually high temperatures
+
+### 6. Correlation Analysis
+- Investigated relationships between temperature and rainfall
+- Generated climate correlation heatmaps
+
+---
+
+## 📷 Visualizations Generated
+
+The project generates the following charts:
+
+- Annual Temperature Trend
+- Annual Rainfall Trend
+- Monthly Temperature Pattern
+- Climate Correlation Heatmap
+- Extreme Heat Event Analysis
+
+All visualizations are stored inside the **images/** directory.
+
+---
+
+## 📌 Key Insights
+
+- Long-term temperature patterns reveal evidence of gradual warming.
+- Annual precipitation varies significantly across years.
+- Seasonal climate cycles remain consistent, while average temperatures show an increasing trend.
+- Extreme heat events have become more frequent in recent years.
+
+---
+
+## 🚀 How to Run the Project
+
+### Clone the Repository
+
+```bash
+
 ```
-ABES_DA_Student_Performance_Project/
+
+### Install Required Libraries
+
+```bash
+pip install -r requirements.txt
+```
+
+### Execute the Project
+
+```bash
+python src/climate_analysis.py
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+climate-change-analysis-ghaziabad/
+│
 ├── data/
-│   ├── raw/student_performance.csv
-│   └── processed/student_performance_clean.csv
-├── notebooks/student_performance_analysis.ipynb
-├── images/                  (charts saved by the notebook)
-├── scripts/generate_data.py (creates the synthetic dataset)
+│   └── "C:\Users\admin01\Desktop\projecthcl\data\ghaziabad_raw_daily_climate_2006_2025.csv"
+│
+├── images/
+│   ├── "C:\Users\admin01\Desktop\projecthcl\images.png"
+│
+├── notebooks/
+│   └── "C:\Users\admin01\Desktop\projecthcl\nootebook.ipynb"
+│
+├── src/
+│   └── climate_analysis.py
+│
+├── README.md
 ├── requirements.txt
 ├── .gitignore
-└── README.md
+└── LICENSE
 ```
 
-## How to run
-```bash
-git clone https://github.com/<your-username>/student-performance-analysis.git
-cd student-performance-analysis
-pip install -r requirements.txt
-jupyter notebook notebooks/student_performance_analysis.ipynb
-```
+---
 
-## Steps followed
-1. Load and inspect data  2. Clean data (duplicates, text, outliers, missing values)  3. Create new columns (Average_Marks, Result_Band, Attendance_Band)  4. Exploratory analysis with charts  5. Insights and recommendations
+## 💡 Future Improvements
 
-## Key findings (from this dataset)
-- Batch average marks ≈ 64; about 6% of students are "At Risk" (average below 50).
-- Attendance and study hours both show a moderate positive correlation with marks (about 0.5).
-- Students with attendance above 75% score noticeably higher than those below 60%.
-- Students with tutoring score slightly higher on average.
+- Add interactive dashboards using Power BI or Tableau
+- Analyze additional climate indicators such as humidity and wind speed
+- Build predictive models for future temperature forecasting
+- Compare climate patterns across multiple Indian cities
 
-## Charts
-![Overall](images/01_overall_performance.png)
-![Attendance and study](images/02_attendance_study.png)
-![Correlation](images/03_correlation.png)
-![Groups](images/04_group_comparison.png)
+---
 
-## Tools
-Python 3 · pandas · NumPy · matplotlib · seaborn · Jupyter Notebook · Git and GitHub
+## 👨‍💻 Author
 
-## Author
-Your Name – B.Tech 1st Year, ABES (replace with your details)
+**Jai Tomar**
+
+Aspiring Data Analyst | Python |
