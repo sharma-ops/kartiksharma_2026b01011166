@@ -167,6 +167,6 @@ climate-change-analysis-ghaziabad/
 
 ## 👨‍💻 Author
 
-**Jai Tomar**
+**kartik sharma**
 
 Aspiring Data Analyst | Python |
